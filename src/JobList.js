@@ -1,59 +1,80 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import {
-    Card,
-    CardContent,
-    Typography,
-    List,
-    ListItem,
-    ListItemText,
-    CircularProgress,
-    Container,
-} from '@mui/material';
+import React from 'react';
+import { Card, CardContent, Typography, Grid, TextField, MenuItem } from '@mui/material';
 
-function JobList() {
-    const [jobs, setJobs] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        axios
-            .get('https://job-tracker-backend-6etg.onrender.com/api/jobs')
-            .then((response) => {
-                setJobs(response.data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error('Error fetching jobs:', error);
-                setLoading(false);
-            });
-    }, []);
+function JobList({
+                     jobs,
+                     statusFilter,
+                     setStatusFilter,
+                     companyFilter,
+                     setCompanyFilter,
+                     dateFilter,
+                     setDateFilter,
+                     searchQuery
+                 }) {
+    const filteredJobs = jobs.filter(job => {
+        const matchesStatus = statusFilter ? job.status.toLowerCase().includes(statusFilter.toLowerCase()) : true;
+        const matchesCompany = companyFilter ? job.company.toLowerCase().includes(companyFilter.toLowerCase()) : true;
+        const matchesDate = dateFilter ? job.appliedDate === dateFilter : true;
+        const matchesSearch = searchQuery ? job.position.toLowerCase().includes(searchQuery.toLowerCase()) : true;
+        return matchesStatus && matchesCompany && matchesDate && matchesSearch;
+    });
 
     return (
-        <Container>
-            <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-                Job Applications
-            </Typography>
+        <div>
+            <Typography variant="h5" gutterBottom>Filter Jobs</Typography>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={4}>
+                    <TextField
+                        label="Filter by Status"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        fullWidth
+                        select
+                    >
+                        <MenuItem value="">All</MenuItem>
+                        <MenuItem value="Applied">Applied</MenuItem>
+                        <MenuItem value="Interview">Interview</MenuItem>
+                        <MenuItem value="Offer">Offer</MenuItem>
+                        <MenuItem value="Rejected">Rejected</MenuItem>
+                    </TextField>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <TextField
+                        label="Filter by Company"
+                        value={companyFilter}
+                        onChange={(e) => setCompanyFilter(e.target.value)}
+                        fullWidth
+                    />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <TextField
+                        label="Filter by Date"
+                        type="date"
+                        value={dateFilter}
+                        onChange={(e) => setDateFilter(e.target.value)}
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                    />
+                </Grid>
+            </Grid>
 
-            {loading ? (
-                <CircularProgress />
-            ) : (
-                <List>
-                    {jobs.map((job) => (
-                        <Card key={job.id} sx={{ mb: 2 }}>
+            <Typography variant="h5" gutterBottom>Job Applications</Typography>
+            <Grid container spacing={2}>
+                {filteredJobs.map(job => (
+                    <Grid item xs={12} key={job.id}>
+                        <Card>
                             <CardContent>
                                 <Typography variant="h6">{job.position}</Typography>
-                                <Typography color="text.secondary">{job.company}</Typography>
+                                <Typography color="textSecondary">{job.company}</Typography>
                                 <Typography>Status: {job.status}</Typography>
-                                <Typography>Applied Date: {job.appliedDate}</Typography>
-                                {job.notes && (
-                                    <Typography variant="body2">Notes: {job.notes}</Typography>
-                                )}
+                                <Typography>Applied on: {job.appliedDate}</Typography>
+                                <Typography>Notes: {job.notes}</Typography>
                             </CardContent>
                         </Card>
-                    ))}
-                </List>
-            )}
-        </Container>
+                    </Grid>
+                ))}
+            </Grid>
+        </div>
     );
 }
 
