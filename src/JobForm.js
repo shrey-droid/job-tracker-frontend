@@ -1,80 +1,96 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import {
+    Box,
+    Button,
+    TextField,
+    Typography,
+    Paper,
+} from '@mui/material';
 
-function JobForm() {
-  const [formData, setFormData] = useState({
-    position: '',
-    company: '',
-    status: '',
-    appliedDate: '',
-    notes: '',
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post('https://job-tracker-backend-6etg.onrender.com/api/jobs', formData);
-      alert('Job added successfully ✅');
-      setFormData({
+function JobForm({ onJobAdded }) {
+    const [formData, setFormData] = useState({
         position: '',
         company: '',
         status: '',
         appliedDate: '',
         notes: '',
-      });
-    } catch (error) {
-      console.error('Error adding job:', error);
-      alert('Failed to add job ❌');
-    }
-  };
+    });
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="position"
-        placeholder="Position"
-        value={formData.position}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="text"
-        name="company"
-        placeholder="Company"
-        value={formData.company}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="text"
-        name="status"
-        placeholder="Status (e.g. Applied)"
-        value={formData.status}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="date"
-        name="appliedDate"
-        value={formData.appliedDate}
-        onChange={handleChange}
-        required
-      />
-      <textarea
-        name="notes"
-        placeholder="Notes"
-        value={formData.notes}
-        onChange={handleChange}
-      />
-      <button type="submit">Add Job</button>
-    </form>
-  );
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        axios
+            .post('https://job-tracker-backend-6etg.onrender.com/api/jobs', formData)
+            .then((response) => {
+                console.log('Job added:', response.data);
+                onJobAdded(); // refresh job list
+                setFormData({
+                    position: '',
+                    company: '',
+                    status: '',
+                    appliedDate: '',
+                    notes: '',
+                });
+            })
+            .catch((error) => {
+                console.error('Error adding job:', error);
+            });
+    };
+
+    return (
+        <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
+            <Typography variant="h6" gutterBottom>
+                Add Job Application
+            </Typography>
+            <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                    label="Position"
+                    name="position"
+                    value={formData.position}
+                    onChange={handleChange}
+                    required
+                />
+                <TextField
+                    label="Company"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    required
+                />
+                <TextField
+                    label="Status (e.g. Applied)"
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    required
+                />
+                <TextField
+                    label="Applied Date"
+                    name="appliedDate"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={formData.appliedDate}
+                    onChange={handleChange}
+                    required
+                />
+                <TextField
+                    label="Notes"
+                    name="notes"
+                    multiline
+                    rows={3}
+                    value={formData.notes}
+                    onChange={handleChange}
+                />
+                <Button type="submit" variant="contained">
+                    Add Job
+                </Button>
+            </Box>
+        </Paper>
+    );
 }
 
 export default JobForm;
-

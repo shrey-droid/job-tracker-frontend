@@ -1,32 +1,60 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import {
+    Card,
+    CardContent,
+    Typography,
+    List,
+    ListItem,
+    ListItemText,
+    CircularProgress,
+    Container,
+} from '@mui/material';
 
 function JobList() {
-  const [jobs, setJobs] = useState([]);
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    axios.get('https://job-tracker-backend-6etg.onrender.com/api/jobs')
-      .then(response => {
-        setJobs(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching jobs:', error);
-      });
-  }, []);
+    useEffect(() => {
+        axios
+            .get('https://job-tracker-backend-6etg.onrender.com/api/jobs')
+            .then((response) => {
+                setJobs(response.data);
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error('Error fetching jobs:', error);
+                setLoading(false);
+            });
+    }, []);
 
-  return (
-    <div>
-      <h2>Job Applications</h2>
-      <ul>
-        {jobs.map(job => (
-          <li key={job.id}>
-            <strong>{job.position}</strong> at <em>{job.company}</em> - {job.status}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+    return (
+        <Container>
+            <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+                Job Applications
+            </Typography>
+
+            {loading ? (
+                <CircularProgress />
+            ) : (
+                <List>
+                    {jobs.map((job) => (
+                        <Card key={job.id} sx={{ mb: 2 }}>
+                            <CardContent>
+                                <Typography variant="h6">{job.position}</Typography>
+                                <Typography color="text.secondary">{job.company}</Typography>
+                                <Typography>Status: {job.status}</Typography>
+                                <Typography>Applied Date: {job.appliedDate}</Typography>
+                                {job.notes && (
+                                    <Typography variant="body2">Notes: {job.notes}</Typography>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))}
+                </List>
+            )}
+        </Container>
+    );
 }
 
 export default JobList;
-
