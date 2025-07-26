@@ -1,5 +1,5 @@
-import React from 'react';
-import { Card, CardContent, Typography, Grid, TextField, MenuItem } from '@mui/material';
+import React, { useState } from 'react';
+import { Card, CardContent, Typography, Grid, TextField, MenuItem, Box } from '@mui/material';
 
 function JobList({
                      jobs,
@@ -11,6 +11,8 @@ function JobList({
                      setDateFilter,
                      searchQuery
                  }) {
+    const [sortBy, setSortBy] = useState('');
+
     const filteredJobs = jobs.filter(job => {
         const matchesStatus = statusFilter ? job.status.toLowerCase().includes(statusFilter.toLowerCase()) : true;
         const matchesCompany = companyFilter ? job.company.toLowerCase().includes(companyFilter.toLowerCase()) : true;
@@ -19,11 +21,18 @@ function JobList({
         return matchesStatus && matchesCompany && matchesDate && matchesSearch;
     });
 
+    const sortedJobs = [...filteredJobs].sort((a, b) => {
+        if (sortBy === 'date') return new Date(b.appliedDate) - new Date(a.appliedDate);
+        if (sortBy === 'company') return a.company.localeCompare(b.company);
+        if (sortBy === 'status') return a.status.localeCompare(b.status);
+        return 0;
+    });
+
     return (
         <div>
             <Typography variant="h5" gutterBottom>Filter Jobs</Typography>
             <Grid container spacing={2} sx={{ mb: 3 }}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <TextField
                         label="Filter by Status"
                         value={statusFilter}
@@ -38,7 +47,7 @@ function JobList({
                         <MenuItem value="Rejected">Rejected</MenuItem>
                     </TextField>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <TextField
                         label="Filter by Company"
                         value={companyFilter}
@@ -46,7 +55,7 @@ function JobList({
                         fullWidth
                     />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <TextField
                         label="Filter by Date"
                         type="date"
@@ -56,11 +65,25 @@ function JobList({
                         InputLabelProps={{ shrink: true }}
                     />
                 </Grid>
+                <Grid item xs={12} sm={3}>
+                    <TextField
+                        select
+                        label="Sort By"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        fullWidth
+                    >
+                        <MenuItem value="">None</MenuItem>
+                        <MenuItem value="date">Date</MenuItem>
+                        <MenuItem value="company">Company</MenuItem>
+                        <MenuItem value="status">Status</MenuItem>
+                    </TextField>
+                </Grid>
             </Grid>
 
             <Typography variant="h5" gutterBottom>Job Applications</Typography>
             <Grid container spacing={2}>
-                {filteredJobs.map(job => (
+                {sortedJobs.map(job => (
                     <Grid item xs={12} key={job.id}>
                         <Card>
                             <CardContent>

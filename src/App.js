@@ -4,6 +4,7 @@ import JobForm from './JobForm';
 import JobList from './JobList';
 import Header from './Header';
 import { Container, TextField } from '@mui/material';
+import ResumeUpload from './ResumeUpload';
 
 function App() {
     const [jobs, setJobs] = useState([]);
@@ -36,16 +37,35 @@ function App() {
 
     return (
         <Container maxWidth="md">
-            <Header />
+            <Header/>
             <TextField
                 label="Search by Position"
                 variant="outlined"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 fullWidth
-                sx={{ mb: 3 }}
+                sx={{mb: 3}}
             />
-            <JobForm addJob={addJob} />
+            <JobForm addJob={addJob}/>
+
+            {/* ✅ Add Resume Upload Section */}
+            <ResumeUpload />
+
+            <input
+                type="text"
+                placeholder="Search by position, company, or notes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                    width: '100%',
+                    padding: '10px',
+                    marginTop: '20px',
+                    fontSize: '16px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                }}
+            />
+
             <JobList
                 jobs={jobs}
                 statusFilter={statusFilter}
